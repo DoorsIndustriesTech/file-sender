@@ -12,35 +12,41 @@ app.use(express.static(__dirname));
 const upload = multer();
 
 app.post("/send", upload.array("files"), async (req, res) => {
-  try {
-    const description = req.body.description;
+	try {
+		const description = req.body.description;
 
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-      }
-    });
+		const transporter = nodemailer.createTransport({
+			// service: "gmail",
+			host: "smtp.gmail.com",
+				port: 587,          // 🔥 use 587 instead of 465
+				secure: false, 
+			auth: {
+				user: process.env.EMAIL_USER,
+				pass: process.env.EMAIL_PASS
+			},
+			tls: {
+				rejectUnauthorized: false
+			}
+		});
 
-    const attachments = (req.files || []).map(file => ({
-      filename: file.originalname,
-      content: file.buffer
-    }));
+		const attachments = (req.files || []).map(file => ({
+			filename: file.originalname,
+			content: file.buffer
+		}));
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: "jeankrlo.2000@hotmail.com",
-      subject: "Files From Website",
-      text: description,
-      attachments
-    });
+		await transporter.sendMail({
+			from: process.env.EMAIL_USER,
+			to: "jeankrlo.2000@hotmail.com",
+			subject: "Files From Website",
+			text: description,
+			attachments
+		});
 
-    res.send("Email sent");
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Error sending email");
-  }
+		res.send("Email sent");
+	} catch (err) {
+		console.error(err);
+		res.status(500).send("Error sending email");
+	}
 });
 
 const PORT = process.env.PORT || 3000;
