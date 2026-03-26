@@ -5,38 +5,45 @@ const cors = require("cors");
 
 const app = express();
 
+// allow all origins (or restrict later)
 app.use(cors({
-	origin: "http://127.0.0.1:5500"
+	origin: "https://file-sender-7ks7.onrender.com"
 }));
 
-const upload = multer(); // memory only (NO saving)
+const upload = multer();
 
 app.post("/send", upload.array("files"), async (req, res) => {
+  try {
+    const description = req.body.description;
 
-	const description = req.body.description;
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
 
-	const transporter = nodemailer.createTransport({
-		service: "gmail",
-		auth: {
-		user: "jeancarlo2451@gmail.com",
-		pass: "dwgf njwd qqoc phen"
-		}
-	});
+    const attachments = (req.files || []).map(file => ({
+      filename: file.originalname,
+      content: file.buffer
+    }));
 
-	const attachments = req.files.map(file => ({
-		filename: file.originalname,
-		content: file.buffer
-	}));
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: "jeankrlo.2000@hotmail.com",
+      subject: "Files From Website",
+      text: description,
+      attachments
+    });
 
-	await transporter.sendMail({
-		from: "jeancarlo2451@gmail.com",
-		to: "jeankrlo.2000@hotmail.com",
-		subject: "Files From Website",
-		text: description,
-		attachments
-	});
-
-	res.send("Email sent");
+    res.send("Email sent");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error sending email");
+  }
 });
 
-app.listen(3000, () => console.log("Server running"));
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => console.log("Server running on", PORT));
