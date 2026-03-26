@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Send Files</title>
+</head>
+<body>
+
+<form id="form">
+    <textarea id="description" placeholder="Enter description (Optional)"></textarea>
+  <input type="file" id="files" multiple />
+  <button type="submit">Send</button>
+</form>
+
+<script>
+document.getElementById("form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const description = document.getElementById('description').value;
+    const files = document.getElementById("files").files;
+    const formData = new FormData();
+    
+    formData.append('description', description);
+
+    for (let i = 0; i < files.length; i++) {
+        formData.append("files", files[i]);
+    }
+
+    await fetch("http://127.0.0.1:3000/send", {
+        method: "POST",
+        body: formData
+    });
+
+    alert("Sent");
+});
+</script>
+
+</body>
+</html>
