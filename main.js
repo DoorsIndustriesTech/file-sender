@@ -26,7 +26,7 @@ app.post("/send", upload.array("files"), async (req, res) => {
 
     await resend.emails.send({
       from: "onboarding@resend.dev", // change later to your domain
-      to: "jeankrlo.2000@hotmail.com",
+      to: "doorsindustries@gmail.com",
       subject: "Files From Website",
       text: description || "No description",
       attachments: attachments
